@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--s:#101010;--s2:#161616;--s3:#1d1d1d;--gold:#c9a96e;--gd:#7a6340;--text:#ece8e1;--muted:#6b6457;--dim:#3a3632;--border:rgba(201,169,110,.15);--soft:rgba(255,255,255,.07);--red:#e05555;--green:#5ea86b;--font-d:'Cormorant Garamond',serif;--font-u:'Syne',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-u);font-size:14px;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+input,textarea,select,button{font-family:var(--font-u);}
+
+#login{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.lbox{width:min(400px,92vw);background:var(--s);border:1px solid var(--border);padding:3rem 2.5rem;}
+.llogo{font-family:var(--font-d);font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gd);margin-bottom:2rem;display:block;}
+.ltitle{font-family:var(--font-d);font-size:2.2rem;font-weight:300;margin-bottom:.3rem;}
+.ltitle em{font-style:italic;color:var(--gold);}
+.lsub{font-size:.7rem;color:var(--muted);margin-bottom:2rem;}
+.lfield{margin-bottom:1rem;}
+.lfield label{display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+.lfield input{width:100%;background:var(--bg);border:1px solid var(--soft);color:var(--text);padding:.75rem 1rem;font-size:.88rem;outline:none;transition:border-color .2s;}
+.lfield input:focus{border-color:var(--gd);}
+.lbtn{width:100%;background:var(--gold);color:#000;border:none;padding:.9rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:.5rem;}
+.lbtn:hover{background:#e0bc80;}
+.lerr{color:var(--red);font-size:.72rem;margin-top:.6rem;display:none;}
+
+#app{display:none;height:100vh;overflow-y:auto;}
+.wrap{max-width:900px;margin:0 auto;padding:3rem 2rem 6rem;}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--soft);}
+.top-logo{font-family:var(--font-d);font-size:1.1rem;color:var(--gold);letter-spacing:.1em;}
+.top-links{display:flex;gap:.6rem;}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;}
+.btn-gold{background:var(--gold);color:#000;border:none;}
+.btn-gold:hover{background:#e0bc80;}
+.btn-out{background:none;border:1px solid var(--soft);color:var(--muted);}
+.btn-out:hover{border-color:var(--gd);color:var(--gold);}
+
+.section{margin-bottom:2.5rem;}
+.sec-title{font-family:var(--font-d);font-size:1.6rem;font-weight:300;margin-bottom:.3rem;}
+.sec-title em{font-style:italic;color:var(--gold);}
+.sec-sub{font-size:.7rem;color:var(--muted);margin-bottom:1.5rem;}
+
+.card{background:var(--s);border:1px solid var(--soft);padding:1.5rem;border-radius:3px;margin-bottom:1rem;}
+.card-head{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gd);margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem;}
+.card-head::before{content:'';width:14px;height:1px;background:var(--gd);}
+
+/* SHEET TABLE */
+.sheet-table{width:100%;border-collapse:collapse;font-size:.8rem;}
+.sheet-table th{text-align:left;padding:.5rem .8rem;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--soft);font-weight:400;}
+.sheet-table td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text);vertical-align:top;}
+.sheet-table tr:last-child td{border-bottom:none;}
+.sheet-table .col-key{color:var(--gold);font-family:monospace;font-size:.75rem;white-space:nowrap;}
+.sheet-table .col-ex{color:var(--muted);font-size:.75rem;}
+.sheet-table .col-desc{color:var(--dim);font-size:.72rem;line-height:1.5;}
+.req-badge{display:inline-block;padding:.15rem .4rem;font-size:.55rem;letter-spacing:.1em;background:rgba(201,169,110,.1);color:var(--gd);border-radius:2px;margin-left:.4rem;}
+.opt-badge{display:inline-block;padding:.15rem .4rem;font-size:.55rem;letter-spacing:.1em;background:rgba(255,255,255,.05);color:var(--dim);border-radius:2px;margin-left:.4rem;}
+
+/* COPY BOX */
+.copy-box{background:var(--s2);border:1px solid var(--soft);padding:1rem 1.2rem;border-radius:2px;margin-bottom:.8rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+.copy-text{font-family:monospace;font-size:.78rem;color:var(--gold);line-height:1.6;white-space:pre-wrap;word-break:break-all;flex:1;}
+.copy-btn{background:none;border:1px solid var(--soft);color:var(--muted);font-family:var(--font-u);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;padding:.35rem .7rem;cursor:pointer;white-space:nowrap;transition:all .2s;border-radius:2px;flex-shrink:0;}
+.copy-btn:hover{border-color:var(--gd);color:var(--gold);}
+.copy-btn.copied{border-color:var(--green);color:var(--green);}
+
+/* STEP CARDS */
+.steps{display:flex;flex-direction:column;gap:.8rem;}
+.step{display:flex;gap:1.2rem;align-items:flex-start;}
+.step-num{width:28px;height:28px;border-radius:50%;border:1px solid var(--gd);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--gold);flex-shrink:0;margin-top:.1rem;}
+.step-body{flex:1;}
+.step-title{font-size:.82rem;color:var(--text);margin-bottom:.2rem;}
+.step-desc{font-size:.72rem;color:var(--muted);line-height:1.6;}
+.step-desc a{color:var(--gold);border-bottom:1px solid rgba(201,169,110,.3);}
+
+/* WORKS PREVIEW */
+.works-preview{display:flex;flex-direction:column;gap:2px;}
+.wp-row{display:flex;align-items:center;gap:1rem;background:var(--s2);border:1px solid var(--soft);padding:.7rem 1rem;border-radius:2px;}
+.wp-num{font-size:.65rem;color:var(--gd);min-width:20px;}
+.wp-info{flex:1;}
+.wp-title{font-size:.82rem;color:var(--text);}
+.wp-meta{font-size:.65rem;color:var(--muted);margin-top:.1rem;}
+.wp-badge{display:inline-block;padding:.15rem .45rem;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;border-radius:2px;}
+.badge-ok{background:rgba(94,168,107,.15);color:var(--green);}
+.badge-err{background:rgba(224,85,85,.15);color:var(--red);}
+.badge-drive{background:rgba(201,169,110,.1);color:var(--gd);}
+.badge-yt{background:rgba(224,85,85,.12);color:var(--red);}
+
+.alert{padding:1rem 1.2rem;border-radius:2px;font-size:.78rem;line-height:1.6;margin-bottom:1rem;}
+.alert-info{background:rgba(201,169,110,.06);border:1px solid var(--border);color:var(--muted);}
+.alert-ok{background:rgba(94,168,107,.08);border:1px solid rgba(94,168,107,.3);color:var(--green);}
+.alert-err{background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.3);color:var(--red);}
+
+#status-bar{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(94,168,107,.9);color:#000;text-align:center;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;padding:.6rem;display:none;backdrop-filter:blur(8px);}
+
+.tab-bar{display:flex;gap:1px;margin-bottom:2rem;background:var(--soft);}
+.tab{flex:1;padding:.65rem;background:var(--s2);border:none;color:var(--muted);cursor:pointer;font-family:var(--font-u);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;transition:all .2s;}
+.tab.active{background:var(--s3);color:var(--gold);}
+
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.loading-row{padding:2rem;text-align:center;color:var(--muted);font-style:italic;font-family:var(--font-d);font-size:1rem;}
+</style>
+</head>
+<body>
+
+<div id="status-bar" id="status-bar">Данные обновлены — сайт покажет изменения автоматически</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <span class="llogo">Portfolio Admin</span>
+    <h1 class="ltitle">Панель <em>управления</em></h1>
+    <p class="lsub">Введи пароль для доступа</p>
+    <div class="lfield"><label>Пароль</label><input type="password" id="pw" placeholder="••••••••"></div>
+    <button class="lbtn" id="loginBtn">Войти</button>
+    <p class="lerr" id="lerr">Неверный пароль</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div class="wrap">
+
+  <div class="top-bar">
+    <span class="top-logo" id="top-logo">Portfolio Admin</span>
+    <div class="top-links">
+      <a href="portfolio.html" target="_blank" class="btn btn-out">↗ Открыть сайт</a>
+      <a href="https://docs.google.com/spreadsheets/d/1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0/edit" target="_blank" class="btn btn-gold">Открыть таблицу Google</a>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('works')">Работы</button>
+    <button class="tab" onclick="switchTab('setup')">Настройка таблицы</button>
+    <button class="tab" onclick="switchTab('settings')">Настройки сайта</button>
+    <button class="tab" onclick="switchTab('password')">Пароль</button>
+  </div>
+
+  <!-- TAB: WORKS -->
+  <div class="tab-panel active" id="tab-works">
+    <div class="section">
+      <h2 class="sec-title">Мои <em>работы</em></h2>
+      <p class="sec-sub">Управляй работами прямо в Google таблице — изменения сразу появятся на сайте</p>
+    </div>
+
+    <div class="alert alert-info">
+      💡 Сайт читает данные напрямую из твоей Google таблицы. Чтобы добавить работу — просто добавь строку на лист <strong style="color:var(--text)">Works</strong>. Чтобы удалить — удали строку. Сайт обновится автоматически при следующем открытии.
+    </div>
+
+    <div class="card">
+      <p class="card-head">Быстрое добавление работы</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <p class="step-title">Загрузи файл на Google Drive</p>
+            <p class="step-desc">Видео или фото → загружаешь в любую папку на drive.google.com</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <p class="step-title">Открой доступ к файлу</p>
+            <p class="step-desc">Правая кнопка → «Открыть доступ» → «Все у кого есть ссылка» → Читатель → Готово</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <p class="step-title">Скопируй ссылку</p>
+            <p class="step-desc">«Копировать ссылку» — выглядит как: <code style="color:var(--gold);font-size:.72rem;">https://drive.google.com/file/d/XXXXX/view</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <p class="step-title">Добавь строку в таблицу</p>
+            <p class="step-desc">Открой <a href="https://docs.google.com/spreadsheets/d/1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0/edit" target="_blank">Google таблицу</a> → лист <strong style="color:var(--text)">Works</strong> → новая строка с названием, категорией и ссылкой</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-head">Текущие работы из таблицы</p>
+      <div id="works-preview"><div class="loading-row">Загружаю данные из таблицы...</div></div>
+    </div>
+
+    <div class="card">
+      <p class="card-head">Поддерживаемые форматы ссылок</p>
+      <table class="sheet-table">
+        <tr><th>Тип</th><th>Пример ссылки</th><th>Результат на сайте</th></tr>
+        <tr><td style="color:var(--gold);">Google Drive</td><td class="col-ex">drive.google.com/file/d/ID/view</td><td style="color:var(--green);">✓ Видео/фото со звуком в плеере</td></tr>
+        <tr><td style="color:var(--red);">YouTube</td><td class="col-ex">youtube.com/watch?v=ID</td><td style="color:var(--green);">✓ Встроенный плеер YouTube</td></tr>
+        <tr><td style="color:var(--muted);">Vimeo</td><td class="col-ex">vimeo.com/123456</td><td style="color:var(--green);">✓ Встроенный плеер Vimeo</td></tr>
+        <tr><td style="color:var(--muted);">Прямая ссылка</td><td class="col-ex">example.com/photo.jpg</td><td style="color:var(--green);">✓ Изображение или видео файл</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: SETUP -->
+  <div class="tab-panel" id="tab-setup">
+    <div class="section">
+      <h2 class="sec-title">Настройка <em>таблицы</em></h2>
+      <p class="sec-sub">Как правильно заполнить Google таблицу чтобы сайт всё подхватил</p>
+    </div>
+
+    <div class="alert alert-info">
+      В таблице должно быть <strong style="color:var(--text)">4 листа</strong>: Works, Settings, Experience, Tools. Первая строка каждого листа — заголовки колонок (именно такие как указано ниже).
+    </div>
+
+    <div class="card">
+      <p class="card-head">Лист: Works — работы</p>
+      <table class="sheet-table">
+        <tr><th>Колонка</th><th>Пример</th><th>Описание</th></tr>
+        <tr><td class="col-key">title <span class="req-badge">обязательно</span></td><td class="col-ex">Рекламный ролик Nike</td><td class="col-desc">Название работы</td></tr>
+        <tr><td class="col-key">src <span class="req-badge">обязательно</span></td><td class="col-ex">drive.google.com/file/d/XXX</td><td class="col-desc">Ссылка на файл (Drive, YouTube, Vimeo)</td></tr>
+        <tr><td class="col-key">category <span class="req-badge">обязательно</span></td><td class="col-ex">Реклама</td><td class="col-desc">Категория (используется для фильтров)</td></tr>
+        <tr><td class="col-key">type <span class="opt-badge">необязательно</span></td><td class="col-ex">video</td><td class="col-desc">video или photo (по умолчанию video)</td></tr>
+        <tr><td class="col-key">year <span class="opt-badge">необязательно</span></td><td class="col-ex">2024</td><td class="col-desc">Год проекта</td></tr>
+        <tr><td class="col-key">client <span class="opt-badge">необязательно</span></td><td class="col-ex">Nike Russia</td><td class="col-desc">Клиент или бренд</td></tr>
+        <tr><td class="col-key">desc <span class="opt-badge">необязательно</span></td><td class="col-ex">Короткий ролик для Instagram</td><td class="col-desc">Описание проекта</td></tr>
+      </table>
+      <div style="margin-top:1rem;">
+        <p style="font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);margin-bottom:.6rem;">Скопируй заголовки для первой строки листа Works:</p>
+        <div class="copy-box">
+          <span class="copy-text">title	src	category	type	year	client	desc</span>
+          <button class="copy-btn" onclick="copyText(this,'title\tsrc\tcategory\ttype\tyear\tclient\tdesc')">Копировать</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-head">Лист: Settings — настройки сайта</p>
+      <p style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;">Две колонки: <code style="color:var(--gold);">key</code> и <code style="color:var(--gold);">value</code></p>
+      <table class="sheet-table">
+        <tr><th>key (точно так)</th><th>value (твоё значение)</th></tr>
+        <tr><td class="col-key">name</td><td class="col-ex">Aleksey</td></tr>
+        <tr><td class="col-key">nameItalic</td><td class="col-ex">Morozov</td></tr>
+        <tr><td class="col-key">tag</td><td class="col-ex">Монтажёр · Motion Designer</td></tr>
+        <tr><td class="col-key">subtitle</td><td class="col-ex">Видеомонтаж · Моушн-дизайн</td></tr>
+        <tr><td class="col-key">email</td><td class="col-ex">your@email.com</td></tr>
+        <tr><td class="col-key">telegram</td><td class="col-ex">@username</td></tr>
+        <tr><td class="col-key">instagram</td><td class="col-ex">@handle</td></tr>
+        <tr><td class="col-key">note</td><td class="col-ex">Открыт для сотрудничества...</td></tr>
+        <tr><td class="col-key">footer_name</td><td class="col-ex">Aleksey Morozov</td></tr>
+        <tr><td class="col-key">stat1_num</td><td class="col-ex">7+</td></tr>
+        <tr><td class="col-key">stat1_label</td><td class="col-ex">Лет опыта</td></tr>
+        <tr><td class="col-key">stat2_num</td><td class="col-ex">120+</td></tr>
+        <tr><td class="col-key">stat2_label</td><td class="col-ex">Завершённых проектов</td></tr>
+        <tr><td class="col-key">stat3_num</td><td class="col-ex">40+</td></tr>
+        <tr><td class="col-key">stat3_label</td><td class="col-ex">Клиентов</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <p class="card-head">Лист: Experience — хронология</p>
+      <table class="sheet-table">
+        <tr><th>Колонка</th><th>Пример</th></tr>
+        <tr><td class="col-key">year</td><td class="col-ex">2021 — сейчас</td></tr>
+        <tr><td class="col-key">role</td><td class="col-ex">Старший видеомонтажёр</td></tr>
+        <tr><td class="col-key">company</td><td class="col-ex">Фриланс</td></tr>
+        <tr><td class="col-key">desc</td><td class="col-ex">Рекламные кампании, клипы</td></tr>
+      </table>
+      <div style="margin-top:1rem;">
+        <div class="copy-box">
+          <span class="copy-text">year	role	company	desc</span>
+          <button class="copy-btn" onclick="copyText(this,'year\trole\tcompany\tdesc')">Копировать</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-head">Лист: Tools — инструменты</p>
+      <table class="sheet-table">
+        <tr><th>Колонка</th><th>Пример</th><th>Варианты</th></tr>
+        <tr><td class="col-key">name</td><td class="col-ex">Adobe Premiere Pro</td><td class="col-desc">—</td></tr>
+        <tr><td class="col-key">desc</td><td class="col-ex">Профессиональный монтаж</td><td class="col-desc">—</td></tr>
+        <tr><td class="col-key">level</td><td class="col-ex">5</td><td class="col-desc">1–5 (кружки-индикаторы)</td></tr>
+        <tr><td class="col-key">icon</td><td class="col-ex">premiere</td><td class="col-desc">premiere / ae / davinci / ps / default</td></tr>
+      </table>
+      <div style="margin-top:1rem;">
+        <div class="copy-box">
+          <span class="copy-text">name	desc	level	icon</span>
+          <button class="copy-btn" onclick="copyText(this,'name\tdesc\tlevel\ticon')">Копировать</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SETTINGS -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="section">
+      <h2 class="sec-title">Настройки <em>сайта</em></h2>
+      <p class="sec-sub">Все настройки меняются в листе Settings таблицы</p>
+    </div>
+    <div class="alert alert-info">
+      Чтобы изменить имя, контакты или тексты — открой таблицу → лист <strong style="color:var(--text)">Settings</strong> → найди нужный ключ → измени значение. Сайт подтянет изменения при следующем открытии.
+    </div>
+    <div class="card">
+      <p class="card-head">Текущие настройки из таблицы</p>
+      <div id="settings-preview"><div class="loading-row">Загружаю...</div></div>
+    </div>
+    <div class="card">
+      <p class="card-head">Открыть таблицу для редактирования</p>
+      <a href="https://docs.google.com/spreadsheets/d/1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0/edit#gid=0" target="_blank" class="btn btn-gold" style="margin-top:.5rem;">Открыть Google таблицу →</a>
+    </div>
+  </div>
+
+  <!-- TAB: PASSWORD -->
+  <div class="tab-panel" id="tab-password">
+    <div class="section">
+      <h2 class="sec-title">Пароль <em>входа</em></h2>
+      <p class="sec-sub">Пароль от этой страницы. Хранится в браузере.</p>
+    </div>
+    <div class="card" style="max-width:400px;">
+      <p class="card-head">Изменить пароль</p>
+      <div style="margin-bottom:1rem;"><label style="display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">Текущий пароль</label><input type="password" id="pw-cur" style="width:100%;background:var(--s2);border:1px solid var(--soft);color:var(--text);padding:.65rem .9rem;font-size:.82rem;outline:none;" placeholder="••••••••"></div>
+      <div style="margin-bottom:1rem;"><label style="display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">Новый пароль</label><input type="password" id="pw-new" style="width:100%;background:var(--s2);border:1px solid var(--soft);color:var(--text);padding:.65rem .9rem;font-size:.82rem;outline:none;" placeholder="••••••••"></div>
+      <div style="margin-bottom:1.2rem;"><label style="display:block;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">Повтори новый пароль</label><input type="password" id="pw-rep" style="width:100%;background:var(--s2);border:1px solid var(--soft);color:var(--text);padding:.65rem .9rem;font-size:.82rem;outline:none;" placeholder="••••••••"></div>
+      <button class="btn btn-gold" style="width:100%;" onclick="changePw()">Изменить пароль</button>
+      <p id="pw-msg" style="font-size:.72rem;margin-top:.7rem;display:none;"></p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const SHEET_ID = '1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0';
+const PW_KEY = 'portfolio_admin_pw';
+
+function getPw() { return localStorage.getItem(PW_KEY) || 'portfolio2025'; }
+
+// LOGIN
+document.getElementById('loginBtn').onclick = doLogin;
+document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+function doLogin() {
+  const v = document.getElementById('pw').value;
+  if (v === getPw()) {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadPreviewData();
+  } else {
+    const e = document.getElementById('lerr');
+    e.style.display = 'block'; e.textContent = 'Неверный пароль';
+    document.getElementById('pw').value = '';
+  }
+}
+
+// TABS
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['works','setup','settings','password'][i]===id));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',['tab-works','tab-setup','tab-settings','tab-password'][i]==='tab-'+id));
+}
+
+// COPY
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Скопировано!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Копировать';btn.classList.remove('copied');},2000);
+  });
+}
+
+// SHEET FETCH
+async function fetchSheet(name) {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const cols = json.table.cols.map(c=>c.label.trim());
+    return (json.table.rows||[]).map(row=>{
+      const obj={};
+      cols.forEach((col,i)=>{const cell=row.c[i];obj[col]=cell?(cell.v!==null&&cell.v!==undefined?String(cell.v).trim():''):'';});
+      return obj;
+    }).filter(row=>Object.values(row).some(v=>v));
+  } catch(e) { return null; }
+}
+
+function gdriveId(url){if(!url)return null;let m=url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);if(m)return m[1];m=url.match(/[?&]id=([a-zA-Z0-9_-]+)/);if(m)return m[1];if(/^[a-zA-Z0-9_-]{25,}$/.test(url.trim()))return url.trim();return null;}
+function isGdrive(url){return url&&url.includes('drive.google.com');}
+function ytId(url){const m=(url||'').match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return m?m[1]:null;}
+function viId(url){const m=(url||'').match(/vimeo\.com\/(\d+)/);return m?m[1]:null;}
+
+async function loadPreviewData() {
+  const [works, settings] = await Promise.all([fetchSheet('Works'), fetchSheet('Settings')]);
+  renderWorksPreview(works);
+  renderSettingsPreview(settings);
+}
+
+function renderWorksPreview(rows) {
+  const el = document.getElementById('works-preview');
+  if (!rows) { el.innerHTML = '<div class="alert alert-err">Ошибка загрузки. Убедись что таблица открыта для всех (режим Читатель).</div>'; return; }
+  if (!rows.length) { el.innerHTML = '<div class="alert alert-info">Лист Works пустой — добавь первую строку с заголовками, затем работы.</div>'; return; }
+  const works = rows.map((r,i)=>({
+    n:i+1, title:r.title||r.Title||'', category:r.category||r.Category||'',
+    src:r.src||r.Src||r.url||r.URL||r.link||r.Link||'',
+    type:(r.type||r.Type||'video').toLowerCase()
+  })).filter(w=>w.title);
+  if(!works.length){el.innerHTML='<div class="alert alert-info">Работ пока нет. Добавь строки в лист Works.</div>';return;}
+  el.innerHTML = `<div class="works-preview">${works.map(w=>{
+    const gid=isGdrive(w.src)?gdriveId(w.src):null;
+    const yt=ytId(w.src);const vi=viId(w.src);
+    let srcBadge='<span class="wp-badge badge-err">Нет ссылки</span>';
+    if(gid) srcBadge='<span class="wp-badge badge-drive">Google Drive</span>';
+    else if(yt) srcBadge='<span class="wp-badge badge-yt">YouTube</span>';
+    else if(vi) srcBadge='<span class="wp-badge badge-ok">Vimeo</span>';
+    else if(w.src) srcBadge='<span class="wp-badge badge-ok">Прямая ссылка</span>';
+    return `<div class="wp-row"><span class="wp-num">${w.n}</span><div class="wp-info"><p class="wp-title">${w.title}</p><p class="wp-meta">${w.category} ${srcBadge}</p></div></div>`;
+  }).join('')}</div><p style="font-size:.65rem;color:var(--muted);margin-top:.8rem;text-align:right;">${works.length} работ загружено из таблицы</p>`;
+}
+
+function renderSettingsPreview(rows) {
+  const el = document.getElementById('settings-preview');
+  if (!rows || !rows.length) { el.innerHTML = '<div class="alert alert-info">Лист Settings пустой. Добавь ключи согласно инструкции во вкладке «Настройка таблицы».</div>'; return; }
+  el.innerHTML = `<table class="sheet-table"><tr><th>Ключ</th><th>Значение</th></tr>${rows.map(r=>`<tr><td class="col-key">${r.key||r.Key||''}</td><td>${r.value||r.Value||'<span style="color:var(--dim);font-style:italic;">пусто</span>'}</td></tr>`).join('')}</table>`;
+}
+
+// PASSWORD
+function changePw() {
+  const cur=document.getElementById('pw-cur').value;
+  const nw=document.getElementById('pw-new').value;
+  const rep=document.getElementById('pw-rep').value;
+  const msg=document.getElementById('pw-msg');
+  if(cur!==getPw()){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Неверный текущий пароль';return;}
+  if(!nw||nw.length<4){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Пароль слишком короткий';return;}
+  if(nw!==rep){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Пароли не совпадают';return;}
+  localStorage.setItem(PW_KEY,nw);
+  ['pw-cur','pw-new','pw-rep'].forEach(id=>document.getElementById(id).value='');
+  msg.style.display='block';msg.style.color='var(--green)';msg.textContent='✓ Пароль изменён';
+  setTimeout(()=>msg.style.display='none',3000);
+}
+</script>
+</body>
+</html>
