@@ -38,19 +38,12 @@ nav.sc{padding:.95rem 5vw;}
 /* HERO */
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 5vw 8vmin;border-bottom:1px solid rgba(0,0,0,.08);position:relative;overflow:hidden;}
 
-/* SHOW ALL BUTTON */
-.works-showmore{display:none;background:rgba(0,0,0,.07);padding:1px;}
-.works-showmore.visible{display:block;}
-.works-showmore-btn{display:flex;width:100%;align-items:center;justify-content:center;gap:1.2rem;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:#000;background:#fff;border:none;cursor:pointer;padding:2.2rem 1.4rem;transition:background .2s,gap .3s;}
-.works-showmore-btn:hover{background:#f8f8f8;gap:1.8rem;}
-.works-showmore-btn::after{content:'→';font-size:.85rem;transition:transform .3s;}
-.works-showmore-btn:hover::after{transform:translateX(4px);}
-
 /* WORKS */
 #works-filter{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:2rem;}
 .fbtn{background:none;border:1px solid rgba(0,0,0,.12);color:#aaa;padding:.38rem 1rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
-.works-grid{columns:2;column-gap:6px;padding:0;}
+#works{position:relative;}
+.works-grid{columns:4;column-gap:6px;padding:0;}
 .wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;break-inside:avoid;margin-bottom:6px;display:block;}
 .wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
 .wcard:hover img,.wcard:hover video{transform:scale(1.04);}
@@ -60,6 +53,16 @@ nav.sc{padding:.95rem 5vw;}
 .wcard-cat{font-family:'Montserrat',sans-serif;font-size:.52rem;letter-spacing:.2em;color:rgba(255,255,255,.55);text-transform:uppercase;margin-top:.3rem;}
 .wbadge{position:absolute;top:.9rem;right:.9rem;font-family:'Montserrat',sans-serif;font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;background:#fff;color:#000;padding:.22rem .55rem;font-weight:700;}
 .works-empty{padding:4rem 2rem;color:#ccc;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Montserrat',sans-serif;}
+/* White fade-out gradient at the bottom of works section */
+.works-fade{position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(to bottom,transparent 0%,rgba(255,255,255,.85) 55%,#fff 100%);pointer-events:none;z-index:2;}
+
+/* SHOW ALL BUTTON */
+.works-showmore{display:none;position:relative;z-index:3;padding:0 0 2vmin;}
+.works-showmore.visible{display:block;}
+.works-showmore-btn{display:flex;width:100%;align-items:center;justify-content:center;gap:1.2rem;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:#000;background:#fff;border:2px solid #000;cursor:pointer;padding:1.6rem 1.4rem;transition:background .2s,color .2s,gap .3s;}
+.works-showmore-btn:hover{background:#000;color:#fff;gap:1.8rem;}
+.works-showmore-btn::after{content:'→';font-size:.85rem;transition:transform .3s;}
+.works-showmore-btn:hover::after{transform:translateX(4px);}
 
 /* HERO CONTENT */
 .h-tag{font-family:'Montserrat',sans-serif;font-size:.56rem;letter-spacing:.32em;color:#aaa;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
@@ -144,7 +147,7 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 @media(max-width:900px){
   .exp-grid,#contact-grid{grid-template-columns:1fr;}
   .stats-col{padding-top:0;flex-direction:row;flex-wrap:wrap;gap:1.5rem;}
-  .works-grid{columns:2;}
+  .works-grid{columns:3;}
 }
 @media(max-width:640px){
   .nav-links{display:none;}
@@ -155,6 +158,7 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   .wcard{margin-bottom:4px;}
   .tools-grid{grid-template-columns:1fr 1fr;}
   .h-bg-num{display:none;}
+  .works-fade{height:160px;}
 }
 </style>
 </head>
@@ -202,6 +206,7 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   <div class="works-grid" id="works-grid">
     <div class="works-empty" id="works-empty"><p>Добавь работы в Google таблицу — они появятся здесь</p></div>
   </div>
+  <div class="works-fade" id="works-fade" style="display:none;"></div>
   <div class="works-showmore" id="works-showmore">
     <button class="works-showmore-btn" onclick="goAllWorks()">Смотреть все работы</button>
   </div>
@@ -412,11 +417,13 @@ function renderGrid(works) {
     el.addEventListener('click', () => { lbIdx = i; openLb(); });
     grid.appendChild(el);
   });
-  // Show button if there are more than MAIN_LIMIT works
+  // Show button and fade if there are more than MAIN_LIMIT works
   if (works.length > MAIN_LIMIT) {
     showmore.classList.add('visible');
+    document.getElementById('works-fade').style.display = 'block';
   } else {
     showmore.classList.remove('visible');
+    document.getElementById('works-fade').style.display = 'none';
   }
   observeReveal();
 }
