@@ -39,12 +39,29 @@ nav.sc{padding:.95rem 5vw;}
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 5vw 8vmin;border-bottom:1px solid rgba(0,0,0,.08);position:relative;overflow:hidden;}
 
 /* SHOW ALL BUTTON */
-.works-showmore{display:none;margin-top:2px;padding:1.4rem 5vw;background:#fff;border-top:1px solid rgba(0,0,0,.07);}
+.works-showmore{display:none;background:rgba(0,0,0,.07);padding:1px;}
 .works-showmore.visible{display:block;}
-.works-showmore-btn{display:inline-flex;align-items:center;gap:1rem;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#000;background:none;border:none;cursor:pointer;transition:gap .35s;padding:0;}
-.works-showmore-btn::after{content:'';width:38px;height:1px;background:#000;transition:width .35s;}
-.works-showmore-btn:hover{gap:1.6rem;}
-.works-showmore-btn:hover::after{width:62px;}
+.works-showmore-btn{display:flex;width:100%;align-items:center;justify-content:center;gap:1.2rem;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:#000;background:#fff;border:none;cursor:pointer;padding:2.2rem 1.4rem;transition:background .2s,gap .3s;}
+.works-showmore-btn:hover{background:#f8f8f8;gap:1.8rem;}
+.works-showmore-btn::after{content:'→';font-size:.85rem;transition:transform .3s;}
+.works-showmore-btn:hover::after{transform:translateX(4px);}
+
+/* WORKS */
+#works-filter{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:2rem;}
+.fbtn{background:none;border:1px solid rgba(0,0,0,.12);color:#aaa;padding:.38rem 1rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
+.works-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:rgba(0,0,0,.07);}
+.wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;}
+.wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
+.wcard:hover img,.wcard:hover video{transform:scale(1.04);}
+.woverlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.1) 40%,transparent 65%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.4rem;}
+.wcard:hover .woverlay{opacity:1;}
+.wcard-title{font-family:'Montserrat',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;color:#fff;text-transform:uppercase;}
+.wcard-cat{font-family:'Montserrat',sans-serif;font-size:.52rem;letter-spacing:.2em;color:rgba(255,255,255,.55);text-transform:uppercase;margin-top:.3rem;}
+.wbadge{position:absolute;top:.9rem;right:.9rem;font-family:'Montserrat',sans-serif;font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;background:#fff;color:#000;padding:.22rem .55rem;font-weight:700;}
+.works-empty{padding:4rem 2rem;color:#ccc;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Montserrat',sans-serif;background:#fff;}
+
+/* HERO CONTENT */
 .h-tag{font-family:'Montserrat',sans-serif;font-size:.56rem;letter-spacing:.32em;color:#aaa;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
 .h-tag::before{content:'';display:block;width:22px;height:1px;background:#aaa;}
 #h-name{font-family:'Montserrat',sans-serif;font-size:clamp(3.8rem,11vw,10rem);font-weight:900;line-height:.88;letter-spacing:-.045em;color:#000;margin-bottom:1rem;text-transform:uppercase;}
@@ -60,21 +77,6 @@ nav.sc{padding:.95rem 5vw;}
 section{padding:8vmin 5vw;border-bottom:1px solid rgba(0,0,0,.07);}
 .sec-lbl{font-family:'Montserrat',sans-serif;font-size:.55rem;letter-spacing:.36em;color:#bbb;text-transform:uppercase;margin-bottom:3rem;display:flex;align-items:center;gap:1rem;}
 .sec-lbl::before{content:'';width:22px;height:1px;background:#bbb;}
-
-/* WORKS */
-#works-filter{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:2rem;}
-.fbtn{background:none;border:1px solid rgba(0,0,0,.12);color:#aaa;padding:.38rem 1rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
-.fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
-.works-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:rgba(0,0,0,.07);}
-.wcard{position:relative;aspect-ratio:16/10;background:#f5f5f5;overflow:hidden;cursor:pointer;}
-.wcard img,.wcard video{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
-.wcard:hover img,.wcard:hover video{transform:scale(1.04);}
-.woverlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.1) 40%,transparent 65%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.4rem;}
-.wcard:hover .woverlay{opacity:1;}
-.wcard-title{font-family:'Montserrat',sans-serif;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;color:#fff;text-transform:uppercase;}
-.wcard-cat{font-family:'Montserrat',sans-serif;font-size:.52rem;letter-spacing:.2em;color:rgba(255,255,255,.55);text-transform:uppercase;margin-top:.3rem;}
-.wbadge{position:absolute;top:.9rem;right:.9rem;font-family:'Montserrat',sans-serif;font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;background:#fff;color:#000;padding:.22rem .55rem;font-weight:700;}
-.works-empty{padding:4rem 2rem;color:#ccc;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Montserrat',sans-serif;background:#fff;}
 
 /* EXPERIENCE */
 .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6vw;}
@@ -147,10 +149,11 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 @media(max-width:640px){
   .nav-links{display:none;}
   .hbg{display:flex;}
-  #hero{padding-top:80px;min-height:100svh;}
+  #hero{min-height:0;padding-top:90px;padding-bottom:10vmin;}
   #h-name{font-size:clamp(3rem,14vw,5rem);}
   .works-grid{grid-template-columns:1fr 1fr;gap:1px;}
   .tools-grid{grid-template-columns:1fr 1fr;}
+  .h-bg-num{display:none;}
 }
 </style>
 </head>
@@ -393,12 +396,13 @@ function renderGrid(works) {
     const gid = isGdrive(w.src) ? gdriveId(w.src) : null;
     const yt = ytId(w.src); const vi = viId(w.src);
     const badge = w.type === 'video' ? '▶ Video' : '◼ Photo';
+    // All media: width:100%, height:auto — natural aspect ratio from the file
     let media = '';
-    if (gid) media = `<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);" onerror="this.style.opacity='.3'">`;
-    else if (yt) media = `<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);">`;
-    else if (vi) media = `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
-    else if (w.type === 'video') media = `<video src="${w.src}" muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;"></video>`;
-    else media = `<img src="${w.src}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s;">`;
+    if (gid) media = `<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);" onerror="this.style.opacity='.3'">`;
+    else if (yt) media = `<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);">`;
+    else if (vi) media = `<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
+    else if (w.type === 'video') media = `<video src="${w.src}" muted loop playsinline preload="metadata" style="width:100%;height:auto;display:block;"></video>`;
+    else media = `<img src="${w.src}" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s;">`;
     el.innerHTML = `${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
     if (w.type === 'video' && !gid && !yt && !vi) {
       el.addEventListener('mouseenter', () => { const v = el.querySelector('video'); if(v) v.play(); });
