@@ -417,9 +417,15 @@ let allWorks=[],visibleWorks=[],lbIdx=0;
 function isMobile(){return window.innerWidth<=640;}
 
 async function init() {
+  // Safety: hide loader after 8s max even if sheets don't respond
+  const loaderTimeout = setTimeout(() => {
+    document.getElementById('loader').classList.add('out');
+  }, 8000);
+
   const [settings,works,experience,tools] = await Promise.all([
     fetchSheet('Settings'),fetchSheet('Works'),fetchSheet('Experience'),fetchSheet('Tools')
   ]);
+  clearTimeout(loaderTimeout);
   const S={};
   settings.forEach(row=>{if(row.key||row.Key)S[row.key||row.Key]=row.value||row.Value||'';});
   cachedS = S;
@@ -493,8 +499,7 @@ async function init() {
 
   document.getElementById('loader').classList.add('out');
   setTimeout(()=>{
-    document.querySelector('#hero .reveal').classList.add('in');
-    observeReveal();
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
   },400);
 }
 
@@ -646,18 +651,6 @@ window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
   resizeTimer=setTimeout(()=>{if(visibleWorks.length)renderGrid(visibleWorks);},200);
 });
-
-function observeReveal(){
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('in');
-        obs.unobserve(e.target);
-      }
-    });
-  },{threshold:.04});
-  document.querySelectorAll('.reveal:not(.in)').forEach(el=>obs.observe(el));
-}
 
 // Init lang from storage
 document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===currentLang));
