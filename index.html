@@ -75,16 +75,12 @@ section{padding:6vmin 5vw;border-bottom:1px solid rgba(0,0,0,.07);}
 .fbtn{background:none;border:1px solid rgba(0,0,0,.12);color:#aaa;padding:.38rem 1rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
 
-/* MASONRY GRID */
+/* MASONRY GRID — JS flex columns, no CSS columns */
 .works-grid-wrap{overflow:hidden;}
-.works-grid{column-gap:2px;}
-.works-grid.cols-4{columns:4;}
-.works-grid.cols-2{columns:2;}
-.wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;break-inside:avoid;margin-bottom:2px;display:block;}
-.wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
-/* prevent layout shift while images load */
-.wcard img{aspect-ratio:16/10;object-fit:cover;}
-.wcard img.loaded{aspect-ratio:auto;object-fit:unset;}
+.works-grid{display:flex;gap:2px;}
+.works-col{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
+.wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;display:block;}
+.wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .6s cubic-bezier(.25,.46,.45,.94);}
 .wcard:hover img,.wcard:hover video{transform:scale(1.04);}
 .woverlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.15) 45%,transparent 70%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.2rem;}
 .wcard:hover .woverlay{opacity:1;}
@@ -171,12 +167,11 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 
 /* RESPONSIVE */
 @media(max-width:1100px){
-  .works-grid.cols-4{columns:3;}
+  /* col count handled by JS */
 }
 @media(max-width:900px){
   .exp-grid,#contact-grid{grid-template-columns:1fr;}
   .stats-col{padding-top:0;flex-direction:row;flex-wrap:wrap;gap:1.5rem;}
-  .works-grid.cols-4{columns:2;}
 }
 @media(max-width:640px){
   html{scroll-behavior:auto;}
@@ -187,8 +182,6 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   #hero{min-height:0;padding-top:85px;padding-bottom:12vmin;}
   #h-name{font-size:clamp(2.8rem,13vw,4.5rem);}
   .h-bg-num{display:none;}
-  .works-grid.cols-4{columns:2;}
-  .wcard{margin-bottom:2px;}
   .tools-grid{grid-template-columns:1fr 1fr;}
   .works-fade{height:180px;margin-top:-180px;}
 }
@@ -321,9 +314,6 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 <script>
 // ── CONFIG ────────────────────────────────────────────
 const SHEET_ID = '1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0';
-// Desktop limit: 8 cards (4 cols × 2 rows). Mobile: 4 cards (2 cols × 2 rows)
-const LIMIT_DESKTOP = 8;
-const LIMIT_MOBILE  = 4;
 
 // ── I18N ─────────────────────────────────────────────
 const LANGS = {
@@ -508,7 +498,79 @@ async function init() {
   },400);
 }
 
-function getLimit(){return isMobile()?LIMIT_MOBILE:LIMIT_DESKTOP;}
+function getColCount(){
+  const w=window.innerWidth;
+  if(w<=640) return 2;
+  if(w<=900) return 2;
+  if(w<=1100) return 3;
+  return 4;
+}
+function getLimit(){
+  const cols=getColCount();
+  return isMobile() ? cols*2 : cols*2; // 2 rows shown
+}
+
+function makeCard(w,i){
+  const el=document.createElement('div');
+  el.className='wcard';  // NO reveal class — no animation
+  const gid=isGdrive(w.src)?gdriveId(w.src):null;
+  const yt=ytId(w.src);const vi=viId(w.src);
+  const badge=w.type==='video'?'▶ Video':'◼ Photo';
+  let media='';
+  if(gid) media=`<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" onerror="this.style.opacity='.3'">`;
+  else if(yt) media=`<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy">`;
+  else if(vi) media=`<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
+  else if(w.type==='video') media=`<video src="${w.src}" muted loop playsinline preload="metadata"></video>`;
+  else media=`<img src="${w.src}" loading="lazy">`;
+  el.innerHTML=`${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
+  if(w.type==='video'&&!gid&&!yt&&!vi){
+    el.addEventListener('mouseenter',()=>{const v=el.querySelector('video');if(v)v.play();});
+    el.addEventListener('mouseleave',()=>{const v=el.querySelector('video');if(v){v.pause();v.currentTime=0;}});
+  }
+  el.addEventListener('click',()=>{lbIdx=i;openLb();});
+  return el;
+}
+
+function renderGrid(works){
+  const grid=document.getElementById('works-grid');
+  grid.innerHTML='';
+  const empty=document.getElementById('works-empty');
+  const fade=document.getElementById('works-fade');
+  const showmore=document.getElementById('works-showmore');
+  if(!works.length){
+    empty.style.display='';
+    grid.appendChild(empty);
+    fade.classList.remove('visible');
+    showmore.classList.remove('visible');
+    return;
+  }
+  empty.style.display='none';
+
+  const cols=getColCount();
+  const limit=cols*2; // always 2 rows
+  const limited=works.slice(0,limit);
+
+  // Create column divs
+  const colEls=[];
+  for(let c=0;c<cols;c++){
+    const col=document.createElement('div');
+    col.className='works-col';
+    grid.appendChild(col);
+    colEls.push(col);
+  }
+  // Distribute cards left-to-right across columns
+  limited.forEach((w,i)=>{
+    colEls[i%cols].appendChild(makeCard(w,i));
+  });
+
+  if(works.length>limit){
+    fade.classList.add('visible');
+    showmore.classList.add('visible');
+  } else {
+    fade.classList.remove('visible');
+    showmore.classList.remove('visible');
+  }
+}
 
 function renderFilters(works){
   const cats=['all',...new Set(works.map(w=>w.category).filter(Boolean))];
@@ -527,48 +589,6 @@ function renderFilters(works){
     };
     bar.appendChild(b);
   });
-}
-
-function makeCard(w,i){
-  const el=document.createElement('div');
-  el.className='wcard reveal';
-  const gid=isGdrive(w.src)?gdriveId(w.src):null;
-  const yt=ytId(w.src);const vi=viId(w.src);
-  const badge=w.type==='video'?'▶ Video':'◼ Photo';
-  let media='';
-  if(gid) media=`<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.opacity='.3'">`;
-  else if(yt) media=`<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" onload="this.classList.add('loaded')">`;
-  else if(vi) media=`<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
-  else if(w.type==='video') media=`<video src="${w.src}" muted loop playsinline preload="metadata" style="width:100%;height:auto;display:block;"></video>`;
-  else media=`<img src="${w.src}" loading="lazy" onload="this.classList.add('loaded')">`;
-  el.innerHTML=`${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
-  if(w.type==='video'&&!gid&&!yt&&!vi){
-    el.addEventListener('mouseenter',()=>{const v=el.querySelector('video');if(v)v.play();});
-    el.addEventListener('mouseleave',()=>{const v=el.querySelector('video');if(v){v.pause();v.currentTime=0;}});
-  }
-  el.addEventListener('click',()=>{lbIdx=i;openLb();});
-  return el;
-}
-
-function renderGrid(works){
-  const grid=document.getElementById('works-grid');
-  grid.querySelectorAll('.wcard').forEach(e=>e.remove());
-  const empty=document.getElementById('works-empty');
-  const fade=document.getElementById('works-fade');
-  const showmore=document.getElementById('works-showmore');
-  if(!works.length){empty.style.display='';fade.classList.remove('visible');showmore.classList.remove('visible');return;}
-  empty.style.display='none';
-  const limit=getLimit();
-  const limited=works.slice(0,limit);
-  limited.forEach((w,i)=>grid.appendChild(makeCard(w,i)));
-  if(works.length>limit){
-    fade.classList.add('visible');
-    showmore.classList.add('visible');
-  } else {
-    fade.classList.remove('visible');
-    showmore.classList.remove('visible');
-  }
-  observeReveal();
 }
 
 function goAllWorks(){
