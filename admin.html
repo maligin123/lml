@@ -243,7 +243,7 @@ input,textarea,select,button{font-family:var(--font-u);}
         <tr><td class="col-key">nameItalic</td><td class="col-ex">Morozov</td></tr>
         <tr><td class="col-key">tag</td><td class="col-ex">Монтажёр · Motion Designer</td></tr>
         <tr><td class="col-key">subtitle</td><td class="col-ex">Видеомонтаж · Моушн-дизайн</td></tr>
-        <tr><td class="col-key">email</td><td class="col-ex">your@email.com</td></tr>
+        <tr><td class="col-key">email</td><td class="col-ex"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6811071d1a280d05090104460b0705">[email&#160;protected]</a></td></tr>
         <tr><td class="col-key">telegram</td><td class="col-ex">@username</td></tr>
         <tr><td class="col-key">instagram</td><td class="col-ex">@handle</td></tr>
         <tr><td class="col-key">note</td><td class="col-ex">Открыт для сотрудничества...</td></tr>
@@ -330,7 +330,7 @@ input,textarea,select,button{font-family:var(--font-u);}
 </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SHEET_ID = '1WbuPS28Bl62cj_tXNm4-sdrmZsOCbXTbLlUX3ptjbR0';
 const PW_KEY = 'portfolio_admin_pw';
 
@@ -431,10 +431,4 @@ function changePw() {
   if(!nw||nw.length<4){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Пароль слишком короткий';return;}
   if(nw!==rep){msg.style.display='block';msg.style.color='var(--red)';msg.textContent='Пароли не совпадают';return;}
   localStorage.setItem(PW_KEY,nw);
-  ['pw-cur','pw-new','pw-rep'].forEach(id=>document.getElementById(id).value='');
-  msg.style.display='block';msg.style.color='var(--green)';msg.textContent='✓ Пароль изменён';
-  setTimeout(()=>msg.style.display='none',3000);
-}
-</script>
-</body>
-</html>
+  ['pw-cur','pw-new','pw-rep'].forEach(id=>d
