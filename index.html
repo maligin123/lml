@@ -33,6 +33,8 @@ nav.sc{padding:.85rem 5vw;}
 .lang-btn:not(:last-child){border-right:1px solid rgba(0,0,0,.12);}
 .lang-btn.active{color:#000;}
 .lang-btn:hover{color:#000;}
+/* mobile-only lang in nav — hidden on desktop */
+.mob-nav-lang{display:none;gap:0;align-items:center;}
 
 .hbg{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
 .hbg span{display:block;width:22px;height:1px;background:#000;transition:.35s cubic-bezier(.25,.46,.45,.94);}
@@ -168,9 +170,13 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   .works-grid.cols-4{columns:2;}
 }
 @media(max-width:640px){
+  /* disable smooth scroll on mobile — prevents teleport */
+  html{scroll-behavior:auto;}
   .nav-links{display:none;}
-  .nav-right .lang-sw{display:none;}
+  /* hide lang from nav-right, show separate mobile lang in nav */
+  .nav-right{display:none;}
   .hbg{display:flex;}
+  .mob-nav-lang{display:flex !important;}
   #hero{min-height:0;padding-top:85px;padding-bottom:12vmin;}
   #h-name{font-size:clamp(2.8rem,13vw,4.5rem);}
   .h-bg-num{display:none;}
@@ -204,6 +210,12 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
       <button class="lang-btn" onclick="setLang('lv')">LV</button>
       <button class="lang-btn" onclick="setLang('ru')">RU</button>
     </div>
+  </div>
+  <!-- Always visible on mobile: lang + burger -->
+  <div class="mob-nav-lang">
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('lv')">LV</button>
+    <button class="lang-btn" onclick="setLang('ru')">RU</button>
   </div>
   <button class="hbg" id="hbg"><span></span><span></span><span></span></button>
 </nav>
@@ -344,7 +356,6 @@ function setLang(lang) {
   applyI18n();
   renderDynamic();
 }
-
 function applyI18n() {
   const t = LANGS[currentLang];
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -578,10 +589,18 @@ document.getElementById('hbg').addEventListener('click',function(){
   this.classList.toggle('open');
   document.getElementById('mob').classList.toggle('open');
 });
-document.getElementById('mob').querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
-  document.getElementById('hbg').classList.remove('open');
-  document.getElementById('mob').classList.remove('open');
-}));
+// Intercept all anchor links — use JS scroll for reliability on iOS
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    // Close mobile menu
+    document.getElementById('hbg').classList.remove('open');
+    document.getElementById('mob').classList.remove('open');
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('sc',scrollY>60));
 document.getElementById('lb').addEventListener('click',function(e){if(e.target===this)closeLb();});
 document.addEventListener('keydown',e=>{
