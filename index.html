@@ -51,7 +51,7 @@ nav.sc{padding:.85rem 5vw;}
 .mob-lang .lang-btn.active{color:#000;}
 
 /* HERO */
-#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 5vw 8vmin;border-bottom:1px solid rgba(0,0,0,.08);position:relative;overflow:hidden;}
+#hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 5vw 8vmin;border-bottom:1px solid rgba(0,0,0,.08);position:relative;overflow:hidden;}
 .h-tag{font-family:'Montserrat',sans-serif;font-size:.56rem;letter-spacing:.32em;color:#aaa;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
 .h-tag::before{content:'';display:block;width:22px;height:1px;background:#aaa;}
 #h-name{font-family:'Montserrat',sans-serif;font-size:clamp(3.8rem,11vw,10rem);font-weight:900;line-height:.88;letter-spacing:-.045em;color:#000;margin-bottom:1rem;text-transform:uppercase;}
@@ -76,11 +76,15 @@ section{padding:6vmin 5vw;border-bottom:1px solid rgba(0,0,0,.07);}
 .fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
 
 /* MASONRY GRID */
+.works-grid-wrap{overflow:hidden;}
 .works-grid{column-gap:2px;}
 .works-grid.cols-4{columns:4;}
 .works-grid.cols-2{columns:2;}
 .wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;break-inside:avoid;margin-bottom:2px;display:block;}
 .wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
+/* prevent layout shift while images load */
+.wcard img{aspect-ratio:16/10;object-fit:cover;}
+.wcard img.loaded{aspect-ratio:auto;object-fit:unset;}
 .wcard:hover img,.wcard:hover video{transform:scale(1.04);}
 .woverlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.15) 45%,transparent 70%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.2rem;}
 .wcard:hover .woverlay{opacity:1;}
@@ -184,7 +188,7 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   #h-name{font-size:clamp(2.8rem,13vw,4.5rem);}
   .h-bg-num{display:none;}
   .works-grid.cols-4{columns:2;}
-  .wcard{margin-bottom:2px;margin-right:2px;}
+  .wcard{margin-bottom:2px;}
   .tools-grid{grid-template-columns:1fr 1fr;}
   .works-fade{height:180px;margin-top:-180px;}
 }
@@ -251,8 +255,10 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
   <p class="sec-lbl reveal" data-i18n="sec_works">Portfolio</p>
   <div id="works-filter" class="reveal"></div>
   <div class="works-bottom">
-    <div class="works-grid cols-4" id="works-grid">
-      <div class="works-empty" id="works-empty"><p data-i18n="works_empty">Add works to Google Sheets — they will appear here</p></div>
+    <div class="works-grid-wrap">
+      <div class="works-grid cols-4" id="works-grid">
+        <div class="works-empty" id="works-empty"><p data-i18n="works_empty">Add works to Google Sheets — they will appear here</p></div>
+      </div>
     </div>
     <div class="works-fade" id="works-fade"></div>
   </div>
@@ -530,11 +536,11 @@ function makeCard(w,i){
   const yt=ytId(w.src);const vi=viId(w.src);
   const badge=w.type==='video'?'▶ Video':'◼ Photo';
   let media='';
-  if(gid) media=`<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" style="width:100%;height:auto;display:block;" onerror="this.style.opacity='.3'">`;
-  else if(yt) media=`<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" style="width:100%;height:auto;display:block;">`;
+  if(gid) media=`<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.opacity='.3'">`;
+  else if(yt) media=`<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" onload="this.classList.add('loaded')">`;
   else if(vi) media=`<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
   else if(w.type==='video') media=`<video src="${w.src}" muted loop playsinline preload="metadata" style="width:100%;height:auto;display:block;"></video>`;
-  else media=`<img src="${w.src}" loading="lazy" style="width:100%;height:auto;display:block;">`;
+  else media=`<img src="${w.src}" loading="lazy" onload="this.classList.add('loaded')">`;
   el.innerHTML=`${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
   if(w.type==='video'&&!gid&&!yt&&!vi){
     el.addEventListener('mouseenter',()=>{const v=el.querySelector('video');if(v)v.play();});
