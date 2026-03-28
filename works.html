@@ -18,8 +18,6 @@ nav.sc{padding:.95rem 5vw;}
 .nav-back{display:inline-flex;align-items:center;gap:.7rem;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#aaa;transition:color .2s;}
 .nav-back::before{content:'←';font-size:.8rem;}
 .nav-back:hover{color:#000;}
-.hbg{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
-.hbg span{display:block;width:22px;height:1px;background:#000;}
 
 /* PAGE HEADER */
 .page-header{padding:calc(8vmin + 72px) 5vw 5vmin;border-bottom:1px solid rgba(0,0,0,.08);}
@@ -33,9 +31,12 @@ nav.sc{padding:.95rem 5vw;}
 .fbtn{background:none;border:1px solid rgba(0,0,0,.12);color:#aaa;padding:.38rem 1rem;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
 .fbtn:hover,.fbtn.active{border-color:#000;color:#000;}
 
-/* GRID */
-.works-grid{columns:4;column-gap:6px;padding:6px 5vw;}
-.wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;break-inside:avoid;margin-bottom:6px;display:block;}
+/* GRID — flex columns (no CSS columns, no gaps/orphans) */
+.works-grid{display:flex;gap:6px;padding:6px 5vw;}
+.works-col{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;}
+
+/* CARD — NO reveal animation */
+.wcard{position:relative;background:#f5f5f5;overflow:hidden;cursor:pointer;display:block;}
 .wcard img,.wcard video{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
 .wcard:hover img,.wcard:hover video{transform:scale(1.04);}
 .woverlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.1) 40%,transparent 65%);opacity:0;transition:opacity .35s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.4rem;}
@@ -62,17 +63,14 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 .lb-close:hover{background:rgba(255,255,255,.1);}
 .lb-nav{display:flex;gap:.4rem;}
 
-/* REVEAL */
+/* REVEAL — only for non-card elements */
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.25,.46,.45,.94),transform .6s cubic-bezier(.25,.46,.45,.94);}
 .reveal.in{opacity:1;transform:none;}
 
 /* RESPONSIVE */
-@media(max-width:1100px){.works-grid{columns:3;}}
 @media(max-width:640px){
-  .nav-links{display:none;}
-  .hbg{display:flex;}
-  .works-grid{columns:2;column-gap:4px;padding:4px 5vw;}
-  .wcard{margin-bottom:4px;}
+  .works-grid{gap:4px;padding:4px 5vw;}
+  .works-col{gap:4px;}
   .page-header{padding-top:calc(6vmin + 72px);}
 }
 </style>
@@ -87,7 +85,7 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-  <div class="page-header-inner">
+  <div class="page-header-inner reveal">
     <h1 class="page-title">Все<br><em>работы</em></h1>
     <p class="page-count" id="page-count"></p>
   </div>
@@ -99,8 +97,9 @@ footer span{font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.
 <!-- GRID -->
 <main>
   <div class="works-grid" id="works-grid">
-    <div class="works-empty" id="works-empty"><p>Загрузка...</p></div>
+    <div class="works-empty" id="works-empty" style="display:none;"><p>Загрузка...</p></div>
   </div>
+  <div id="loading-msg" style="padding:4rem 5vw;color:#ccc;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Montserrat',sans-serif;">Загрузка...</div>
 </main>
 
 <footer>
@@ -159,6 +158,13 @@ function viId(url) { const m = (url||'').match(/vimeo\.com\/(\d+)/); return m ? 
 
 let allWorks = [], visibleWorks = [], lbIdx = 0;
 
+function getColCount() {
+  const w = window.innerWidth;
+  if (w <= 640) return 2;
+  if (w <= 900) return 3;
+  return 4;
+}
+
 async function init() {
   // Try sessionStorage first (instant), then fetch from sheet
   const cached = sessionStorage.getItem('allWorks');
@@ -183,13 +189,17 @@ async function init() {
   allWorks = rows;
   visibleWorks = [...allWorks];
 
+  document.getElementById('loading-msg').style.display = 'none';
   document.getElementById('page-count').textContent = allWorks.length + ' работ';
   document.getElementById('footer-copy').textContent = '© ' + new Date().getFullYear();
 
   renderFilters(allWorks);
   renderGrid(allWorks);
 
-  setTimeout(() => observeReveal(), 100);
+  // Reveal only header
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  }, 50);
 }
 
 function renderFilters(works) {
@@ -211,33 +221,55 @@ function renderFilters(works) {
   });
 }
 
+function makeCard(w, globalIdx) {
+  const el = document.createElement('div');
+  el.className = 'wcard'; // NO reveal, NO animation
+  const gid = isGdrive(w.src) ? gdriveId(w.src) : null;
+  const yt = ytId(w.src);
+  const vi = viId(w.src);
+  const badge = w.type === 'video' ? '▶ Video' : '◼ Photo';
+  let media = '';
+  if (gid) media = `<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" onerror="this.style.opacity='.3'">`;
+  else if (yt) media = `<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy">`;
+  else if (vi) media = `<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
+  else if (w.type === 'video') media = `<video src="${w.src}" muted loop playsinline preload="metadata"></video>`;
+  else media = `<img src="${w.src}" loading="lazy">`;
+  el.innerHTML = `${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
+  if (w.type === 'video' && !gid && !yt && !vi) {
+    el.addEventListener('mouseenter', () => { const v = el.querySelector('video'); if(v) v.play(); });
+    el.addEventListener('mouseleave', () => { const v = el.querySelector('video'); if(v){v.pause();v.currentTime=0;} });
+  }
+  el.addEventListener('click', () => { lbIdx = globalIdx; openLb(); });
+  return el;
+}
+
 function renderGrid(works) {
   const grid = document.getElementById('works-grid');
-  grid.querySelectorAll('.wcard').forEach(e => e.remove());
+  // Remove all columns
+  grid.querySelectorAll('.works-col').forEach(e => e.remove());
+
   const empty = document.getElementById('works-empty');
-  if (!works.length) { empty.style.display = ''; return; }
+  if (!works.length) {
+    empty.style.display = '';
+    empty.querySelector('p').textContent = 'Работ не найдено';
+    grid.appendChild(empty);
+    return;
+  }
   empty.style.display = 'none';
+
+  const cols = getColCount();
+  const colEls = [];
+  for (let c = 0; c < cols; c++) {
+    const col = document.createElement('div');
+    col.className = 'works-col';
+    grid.appendChild(col);
+    colEls.push(col);
+  }
+
+  // Distribute cards across columns left-to-right (fills gaps naturally)
   works.forEach((w, i) => {
-    const el = document.createElement('div');
-    el.className = 'wcard reveal';
-    const gid = isGdrive(w.src) ? gdriveId(w.src) : null;
-    const yt = ytId(w.src); const vi = viId(w.src);
-    const badge = w.type === 'video' ? '▶ Video' : '◼ Photo';
-    let media = '';
-    if (gid) media = `<img src="https://drive.google.com/thumbnail?id=${gid}&sz=w800" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);" onerror="this.style.opacity='.3'">`;
-    else if (yt) media = `<img src="https://img.youtube.com/vi/${yt}/mqdefault.jpg" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.25,.46,.45,.94);">`;
-    else if (vi) media = `<div style="width:100%;aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:2rem;">▶</div>`;
-    else if (w.type === 'video') media = `<video src="${w.src}" muted loop playsinline preload="metadata" style="width:100%;height:auto;display:block;"></video>`;
-    else media = `<img src="${w.src}" loading="lazy" style="width:100%;height:auto;display:block;transition:transform .7s;">`;
-    el.innerHTML = `${media}<div class="woverlay"><p class="wcard-title">${w.title}</p><p class="wcard-cat">${w.category}${w.year?' · '+w.year:''}</p></div><div class="wbadge">${badge}</div>`;
-    if (w.type === 'video' && !gid && !yt && !vi) {
-      el.addEventListener('mouseenter', () => { const v = el.querySelector('video'); if(v) v.play(); });
-      el.addEventListener('mouseleave', () => { const v = el.querySelector('video'); if(v){v.pause();v.currentTime=0;} });
-    }
-    el.addEventListener('click', () => { lbIdx = i; openLb(); });
-    grid.appendChild(el);
+    colEls[i % cols].appendChild(makeCard(w, i));
   });
-  observeReveal();
 }
 
 function openLb() {
@@ -266,12 +298,12 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowLeft') lbNav(-1);
 });
 
-function observeReveal() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach((e,i) => { if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*50);obs.unobserve(e.target);} });
-  }, {threshold:.06});
-  document.querySelectorAll('.reveal:not(.in)').forEach(el => obs.observe(el));
-}
+// Re-render on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (visibleWorks.length) renderGrid(visibleWorks); }, 200);
+});
 
 init();
 </script>
